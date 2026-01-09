@@ -48,15 +48,18 @@ def leszallasi_fazis(fuggoleges_sebesseg):
     return forgatas, toloero
 
 
-def vezerles(kezdeti_stabilizalas_szukseges, kezdeti_vizszintes_sebesseg, vizszintes_sebesseg, fuggoleges_sebesseg, cel_gyors_h, leszallas_x, x, cel, mozgas, leszallas, fordulopont, pi):
+def vezerles(kezdeti_stabilizalas_szukseges, kezdeti_vizszintes_sebesseg, vizszintes_sebesseg, fuggoleges_sebesseg, szukseges_vizszintes_gyorsulas, leszallas_x, x, cel, mozgas, leszallas, fordulopont, pi):
     if kezdeti_stabilizalas_szukseges:
         toloero = 4
         irany = irany_sebesseg(kezdeti_vizszintes_sebesseg)
-        try:
-            alap_szog = int(math.asin(cel_gyors_h / toloero) * 180 / pi)
-        except Exception:
-            alap_szog = 0
+        # clamp: asin input in [-1,1]; ensure minimum thrust during stabilization
+        toloero = max(toloero, 2)
+        ratio = szukseges_vizszintes_gyorsulas / toloero if toloero != 0 else 0.0
+        ratio = max(-1.0, min(1.0, ratio))
+        alap_szog = int(math.asin(ratio) * 180 / pi)
         forgatas = irany * (alap_szog + 2)
+        # clamp rotation to safe range
+        forgatas = max(-90, min(90, forgatas))
         if fuggoleges_sebesseg > 0:
             toloero = 2
         if abs(vizszintes_sebesseg) < 2:
@@ -128,12 +131,12 @@ while True:
         kezdeti_vizszintes_sebesseg = vizszintes_sebesseg
         kezdeti_fuggoleges_sebesseg = fuggoleges_sebesseg
         # Cel ertekek
-        cel_gyors_h = (kezdeti_vizszintes_sebesseg ** 2) / (2 * kezdo_tav_x) if kezdo_tav_x != 0 else 0  # Vizszintes gyorsulas
+        szukseges_vizszintes_gyorsulas = (kezdeti_vizszintes_sebesseg ** 2) / (2 * kezdo_tav_x) if kezdo_tav_x != 0 else 0  # Vizszintes gyorsulas
         try:
             cel_ido = (2 * kezdo_tav_x) // (kezdeti_vizszintes_sebesseg)
         except Exception:
             pass
-        if abs(cel_gyors_h) < 2 and kezdeti_vizszintes_sebesseg != 0:
+        if abs(szukseges_vizszintes_gyorsulas) < 2 and kezdeti_vizszintes_sebesseg != 0:
             print(0, 4)
             continue
         kezdes_szamitas = False  # Kesz a kezdeti kalkulacio
@@ -149,7 +152,7 @@ while True:
         kezdeti_vizszintes_sebesseg,
         vizszintes_sebesseg,
         fuggoleges_sebesseg,
-        cel_gyors_h,
+        szukseges_vizszintes_gyorsulas,
         leszallas_x,
         x,
         cel,

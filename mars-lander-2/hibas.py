@@ -71,12 +71,12 @@ while True:
         kezdo_h_seb = h_seb
         kezdo_v_seb = v_seb
         # Cel ertekek
-        cel_gyors_h = (kezdo_h_seb ** 2) / (2 * kezdo_tav_x) if kezdo_tav_x != 0 else 0  # Vizszintes gyorsulas
+        szukseges_vizszintes_gyorsulas = (kezdo_h_seb ** 2) / (2 * kezdo_tav_x) if kezdo_tav_x != 0 else 0  # Vizszintes gyorsulas
         try:
             cel_ido = (2 * kezdo_tav_x) // (kezdo_h_seb)
         except Exception:
             pass
-        if abs(cel_gyors_h) < 2 and kezdo_h_seb != 0:
+        if abs(szukseges_vizszintes_gyorsulas) < 2 and kezdo_h_seb != 0:
             print(0, 4)
             continue
         kezdes_szamitas = False  # Kesz a kezdeti kalkulacio
@@ -90,7 +90,7 @@ while True:
     if kezdo_mozgas_ellent is True:
         toloero = 4  # Fix toloero a gyors fekezeshez
         irany = -irany_sebesseg(kezdo_h_seb)  # Ellensulyozzuk az indulasi iranyt
-        forgatas = irany * (int(math.asin(cel_gyors_h / toloero) * 180 / pi) + 2)
+        forgatas = irany * (int(math.asin(szukseges_vizszintes_gyorsulas / toloero) * 180 / pi) + 2)
         if v_seb > 0:
             toloero = 2
         if abs(h_seb) < 2:

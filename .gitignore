@@ -1,5 +1,6 @@
 .idea/
 .iml
+notebooks/.local/
 /notebooks/.ipynb_checkpoints/
 /notebooks/.ipython/profile_default/history.sqlite
 /notebooks/.local/share/jupyter/runtime/kernel-73ff90ea-95b6-4ddd-a70b-15be3a2ce6c8.json
