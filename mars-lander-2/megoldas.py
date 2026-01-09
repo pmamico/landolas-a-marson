@@ -8,7 +8,6 @@ def tavolsag_pont(hely1, hely2):
 
 
 def tavolsag(c1, c2):
-    # Kulonbseg ket skalar kozott (itt x-koordinata tavolsaga)
     return c1 - c2
 
 
@@ -49,7 +48,7 @@ def leszallasi_fazis(fuggoleges_sebesseg):
     return forgatas, toloero
 
 
-def ellensulyozas(kezdeti_stabilizalas_szukseges, kezdeti_vizszintes_sebesseg, vizszintes_sebesseg, fuggoleges_sebesseg, cel_gyors_h, leszallas_x, x, cel, mozgas, leszallas, fordulopont, pi):
+def vezerles(kezdeti_stabilizalas_szukseges, kezdeti_vizszintes_sebesseg, vizszintes_sebesseg, fuggoleges_sebesseg, cel_gyors_h, leszallas_x, x, cel, mozgas, leszallas, fordulopont, pi):
     if kezdeti_stabilizalas_szukseges:
         toloero = 4
         irany = irany_sebesseg(kezdeti_vizszintes_sebesseg)
@@ -145,7 +144,7 @@ while True:
             fordulopont = (x + cel[0]) // 2
 
     # Fazisvezerles: ellensulyozas + mozgas/leszallas delegalva egy helyre
-    forgatas, toloero, ellensulyozni_kell, mozgas, leszallas, fordulopont = ellensulyozas(
+    forgatas, toloero, ellensulyozni_kell, mozgas, leszallas, fordulopont = vezerles(
         ellensulyozni_kell,
         kezdeti_vizszintes_sebesseg,
         vizszintes_sebesseg,
