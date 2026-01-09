@@ -1,2 +1,11 @@
 .idea/
 .iml
+/notebooks/.ipython/profile_default/history.sqlite
+/notebooks/.local/share/jupyter/runtime/kernel-73ff90ea-95b6-4ddd-a70b-15be3a2ce6c8.json
+/notebooks/.local/share/jupyter/runtime/*.json
+/notebooks/.local/share/jupyter/runtime/*.html
+/notebooks/.local/share/jupyter/nbsignatures.db
+/notebooks/.local/share/jupyter/runtime/notebook_cookie_secret
+/notebooks/.local/share/jupyter/notebook_secret
+/notebooks/.ipython/profile_default/startup/README
+/notebooks/.ipynb_checkpoints/START-checkpoint.ipynb
