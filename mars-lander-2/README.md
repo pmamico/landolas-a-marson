@@ -1,36 +1,73 @@
-Same place, the next day. You have joined Jeff and Mike in the crisis meeting room of the Kennedy Space Center.
+# Mars Lander — 2. epizód
 
-“OK, I see you got the general idea. Mike, what do you think of our new recruit so far? ”
-“There's still a long way to go... ”
-“Oh c'mon Mike, you're always so skeptical! ”
+## Történet
 
-Jeff turns and glares at you with his steel-blue eyes.
+Ugyanaz a helyszín, másnap. Jeffhez és Mike‑hoz csatlakoztál a Kennedy Űrközpont válságértekezletén.
 
-“ But he IS right! This first test was just a warm-up. Now you'll need to deal with more challenging situations. You see, we must be prepared to face anything, the success of the mission depends upon it! ”
+„Oké, látom, érted a lényeget. Mike, mit gondolsz az új emberünkről eddig?”  
+„Még hosszú az út áll előtte...”  
+„Ugyan már, Mike, te mindig ilyen szkeptikus vagy!”  
 
+Jeff acélkék szemekkel rád szegezi a tekintetét.  
 
+„De IGAZA van! Az első teszt csak bemelegítés volt. 
+Most nehezebb helyzetekkel kell megbirkóznod. 
+Mindenre fel kell készülnünk — a küldetés sikere ezen múlik!”  
 
+## Leírás
 
+A feladatod, hogy biztonságosan leszállítsd a „Mars Lander” űrhajót, amely az Opportunity rovert szállítja. A leszállást egy program vezérli, és jelenleg a NASA szimulátorán a hibaarány elfogadhatatlan.
 
-The goal for your program is to safely land the "Mars Lander" shuttle, the landing ship which contains the Opportunity rover. Mars Lander is guided by a program, and right now the failure rate for landing on the NASA simulator is unacceptable.
+Ez a „Mars Lander” trilógia második szintje. A vezérlők megegyeznek az előző szinttel, de most már a dőlésszöget is irányítanod kell a sikerhez.
 
-This puzzle is the second level of the "Mars Lander" trilogy. The controls are the same as the previous level but you must now control the angle in order to succeed.
+A szimulátor játékként működik: a Mars Lander egy korlátozott marsi légtérben mozog.
 
+- A pálya 7000 m széles és 3000 m magas.
+- A felszínen egyetlen, legalább 1000 m széles sík leszállóterület található.
 
-Built as a game, the simulator puts Mars Lander on a limited zone of Mars sky.
+Minden másodpercben, a pillanatnyi repülési paraméterek (pozíció, sebesség, üzemanyag stb.) alapján a programnak meg kell adnia az új cél dőlésszöget és a hajtómű tolóerejét.
 
-The zone is 7000m wide and 3000m high.
+A játék légkör nélküli szabadesést szimulál. A Mars gravitációja 3.711 m/s². X tolóerő mellett X m/s² gyorsulás keletkezik és másodpercenként X liter üzemanyagot fogyasztunk. Következésképp majdnem függőleges helyzetben a gravitáció ellensúlyozásához 4-es tolóerő szükséges.
 
-There is a unique area of flat ground on the surface of Mars, which is at least 1000 meters wide.
+Sikeres leszállás feltételei:
+- sík talajra érkezés,
+- függőleges helyzet (dőlésszög = 0°),
+- korlátozott függőleges sebesség (abszolút értékben ≤ 40 m/s),
+- korlátozott vízszintes sebesség (abszolút értékben ≤ 20 m/s).
 
-Every second, depending on the current flight parameters (location, speed, fuel ...), the program must provide the new desired tilt angle and thrust power of Mars Lander:
+Változások az 1. szinthez képest:
+- a dőlésszöget aktívan szabályoznod kell, és vízszintesen is manőverezned kell a leszállózóna eléréséhez;
+- a dőlésszög körönként legfeljebb ±15°‑kal, a tolóerő legfeljebb ±1‑gyel változhat.
 
-The game simulates a free fall without atmosphere. Gravity on Mars is 3.711 m/s² . For a thrust power of X, a push force equivalent to X m/s² is generated and X liters of fuel are consumed. As such, a thrust power of 4 in an almost vertical position is needed to compensate for the gravity on Mars.
+A program először a bemenetet olvassa be a szabványos bemenetről. Ezután egy végtelen ciklusban minden körben beolvassa a Mars Lander aktuális állapotát, és utasításokat ír a szabványos kimenetre a mozgáshoz.
 
-For a landing to be successful, the ship must:
-land on flat ground
-land in a vertical position (tilt angle = 0°)
-vertical speed must be limited ( ≤ 40m/s in absolute value)
-horizontal speed must be limited ( ≤ 20m/s in absolute value)  
+## Bemenet
 
+### Inicializálás
+- 1. sor: egy egész szám, surfaceN — a Mars felszínét leíró pontok száma.
+- A következő surfaceN sor: két egész, landX landY — egy talajpont koordinátái. A pontokat sorrendben összekötve kapjuk a Mars felszínének szegmenseit. Az első pontnál landX = 0, az utolsónál landX = 6999.
 
+### Egy játékkör bemenete
+- Egy sor, 7 egész számmal: X Y hSpeed vSpeed fuel rotate power
+- X, Y: a Mars Lander koordinátái (m).
+- hSpeed, vSpeed: a vízszintes és függőleges sebesség (m/s). Iránytól függően lehetnek negatívak.
+- fuel: a maradék üzemanyag literben. Ha elfogy, a tolóerő automatikusan 0.
+- rotate: a Mars Lander dőlésszöge fokban.
+- power: a hajtómű tolóereje.
+
+## Kimenet
+
+### Egy játékkör kimenete
+- Egy sor, 2 egész számmal: rotate power
+- rotate: a kívánt dőlésszög. Minden körben a tényleges szög legfeljebb ±15°‑kal térhet el az előző kör értékétől.
+- power: a kívánt tolóerő (0 = kikapcsolva, 4 = maximum). Minden körben a tényleges teljesítmény legfeljebb ±1‑gyel változhat az előző körhöz képest.
+
+## Korlátozások
+- 2 ≤ surfaceN < 30
+- 0 ≤ X < 7000
+- 0 ≤ Y < 3000
+- −500 < hSpeed, vSpeed < 500
+- 0 ≤ fuel ≤ 2000
+- −90 ≤ rotate ≤ 90
+- 0 ≤ power ≤ 4
+- Válaszidő körönként ≤ 100 ms
