@@ -10,7 +10,7 @@ DO_GIT_DIR="${DO_GIT_DIR:-landolas-a-marson}"
 DO_REGION="${DO_REGION:-fra1}"
 DOCTL_CTX="${DOCTL_CTX:---context gui}"
 DO_SSH_KEY_NAME="${DO_SSH_KEY_NAME:-m1}"
-SSH_WAIT_SECONDS="${SSH_WAIT_SECONDS:-40}"
+SSH_WAIT_SECONDS="${SSH_WAIT_SECONDS:-5}"
 
 log() { printf "[%s] %s\n" "$(date '+%F %T')" "$*" >&2; }
 
@@ -54,7 +54,11 @@ else
   cd "${REPO_DIR}"
 fi
 
-NOTEBOOK_PATH="/notebooks"
+if [[ -d "notebooks" ]]; then
+  chmod -R 777 "notebooks"
+fi
+
+NOTEBOOK_PATH="notebooks"
 if [[ -d "${NOTEBOOK_PATH}" ]]; then
   # Ensure the Jupyter runtime dir is writable for the notebook UID/GID
   chown -R 1000:100 "${NOTEBOOK_PATH}"
