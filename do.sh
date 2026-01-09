@@ -8,10 +8,11 @@ DO_IMAGE_SLUG="${DO_IMAGE_SLUG:-docker-20-04}"
 DO_GIT_REPO="${DO_GIT_REPO:-https://github.com/pmamico/landolas-a-marson}"
 DO_GIT_DIR="${DO_GIT_DIR:-landolas-a-marson}"
 DO_REGION="${DO_REGION:-fra1}"
+DOCTL_CTX="${DOCTL_CTX:---context gui}"
 DO_SSH_KEY_NAME="${DO_SSH_KEY_NAME:-m1}"
-SSH_WAIT_SECONDS="${SSH_WAIT_SECONDS:-60}"
+SSH_WAIT_SECONDS="${SSH_WAIT_SECONDS:-40}"
 
-log() { printf "[%s] %s\n" "$(date '+%F %T')" "$*"; }
+log() { printf "[%s] %s\n" "$(date '+%F %T')" "$*" >&2; }
 
 need() {
   command -v "$1" >/dev/null 2>&1 || { echo "Missing required command: $1" >&2; exit 1; }
@@ -53,6 +54,13 @@ else
   cd "${REPO_DIR}"
 fi
 
+NOTEBOOK_PATH="/notebooks"
+if [[ -d "${NOTEBOOK_PATH}" ]]; then
+  # Ensure the Jupyter runtime dir is writable for the notebook UID/GID
+  chown -R 1000:100 "${NOTEBOOK_PATH}"
+  chmod -R u+rwX,g+rwX "${NOTEBOOK_PATH}"
+fi
+
 docker compose up -d
 EOS
 )"
@@ -60,12 +68,12 @@ EOS
 lookup_ssh_key() {
   log "Looking up SSH key named '${DO_SSH_KEY_NAME}' in DigitalOcean account..."
   local ssh_key_id
-  ssh_key_id="$(doctl --context gui compute ssh-key list --format ID,Name --no-header \
+  ssh_key_id="$(doctl ${DOCTL_CTX} compute ssh-key list --format ID,Name --no-header \
     | awk -v key="${DO_SSH_KEY_NAME}" '$2==key{print $1; exit}')"
 
   if [[ -z "${ssh_key_id}" ]]; then
-    echo "ERROR: Could not find an SSH key with Name == '${DO_SSH_KEY_NAME}' via: doctl --context gui compute ssh-key list" >&2
-    echo "Tip: run: doctl --context gui compute ssh-key list --format ID,Name,Fingerprint" >&2
+    echo "ERROR: Could not find an SSH key with Name == '${DO_SSH_KEY_NAME}' via: doctl ${DOCTL_CTX} compute ssh-key list" >&2
+    echo "Tip: run: doctl ${DOCTL_CTX} compute ssh-key list --format ID,Name,Fingerprint" >&2
     exit 1
   fi
   log "Using SSH key ID: ${ssh_key_id} (Name: ${DO_SSH_KEY_NAME})"
@@ -93,8 +101,8 @@ wait_for_ipv4() {
   local status=""
   log "Waiting for droplet ${droplet_id} to become active and get a public IPv4..."
   for _ in {1..120}; do
-    status="$(doctl --context gui compute droplet get "${droplet_id}" --format Status --no-header 2>/dev/null || true)"
-    ipv4="$(doctl --context gui compute droplet get "${droplet_id}" --format PublicIPv4 --no-header 2>/dev/null || true)"
+    status="$(doctl ${DOCTL_CTX} compute droplet get "${droplet_id}" --format Status --no-header 2>/dev/null || true)"
+    ipv4="$(doctl ${DOCTL_CTX} compute droplet get "${droplet_id}" --format PublicIPv4 --no-header 2>/dev/null || true)"
     if [[ "${status}" == "active" && -n "${ipv4}" && "${ipv4}" != "<nil>" ]]; then
       printf '%s' "${ipv4}"
       return
@@ -106,10 +114,17 @@ wait_for_ipv4() {
 
 run_remote_setup() {
   local droplet_id="$1"
-  log "Waiting ${SSH_WAIT_SECONDS}s before attempting remote setup on droplet ${droplet_id}..."
-  sleep "${SSH_WAIT_SECONDS}"
-  log "Running remote deployment via doctl compute ssh: git clone + docker compose up -d ..."
-  doctl --context gui compute ssh "${droplet_id}" --ssh-user "${DO_SSH_USER}" --command "bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
+  local attempt=1
+  while true; do
+    log "Attempting remote deployment on droplet ${droplet_id} (ssh attempt ${attempt})..."
+    if doctl ${DOCTL_CTX} compute ssh "${droplet_id}" --ssh-user "${DO_SSH_USER}" --ssh-command "bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"; then
+      log "Remote deployment finished on droplet ${droplet_id} (attempt ${attempt})."
+      break
+    fi
+    log "SSH attempt ${attempt} failed, retrying in ${SSH_WAIT_SECONDS}s..."
+    sleep "${SSH_WAIT_SECONDS}"
+    attempt=$((attempt + 1))
+  done
 }
 
 create_single_droplet() {
@@ -118,7 +133,7 @@ create_single_droplet() {
   log "Creating droplet '${droplet_name}' in region '${DO_REGION}' with image '${DO_IMAGE_SLUG}'..."
   local create_out
   create_out="$(
-    doctl --context gui compute droplet create "${droplet_name}" \
+    doctl ${DOCTL_CTX} compute droplet create "${droplet_name}" \
       --region "${DO_REGION}" \
       --size "s-1vcpu-2gb" \
       --image "${DO_IMAGE_SLUG}" \
@@ -148,13 +163,14 @@ create_single_droplet() {
 
   run_remote_setup "${droplet_id}"
   log "Done. Droplet: ${droplet_name} (${ipv4})"
+  printf 'http://%s:8888\n' "${ipv4}"
 }
 
 create_droplets() {
   local count="$1"
   log "Determining next droplet name with prefix '${DO_DROPLET_PREFIX}-' ..."
   local existing_names
-  existing_names="$({ doctl --context gui compute droplet list --format Name --no-header 2>/dev/null || true; } | sort)"
+  existing_names="$({ doctl ${DOCTL_CTX} compute droplet list --format Name --no-header 2>/dev/null || true; } | sort)"
   local max_n
   max_n="$(determine_max_suffix "${existing_names}")"
   local ssh_key_id
@@ -169,7 +185,7 @@ create_droplets() {
 
 list_droplets() {
   local rows
-  rows="$({ doctl --context gui compute droplet list --format Name,PublicIPv4 --no-header 2>/dev/null || true; } | sort)"
+  rows="$({ doctl ${DOCTL_CTX} compute droplet list --format Name,PublicIPv4 --no-header 2>/dev/null || true; } | sort)"
   local found=0
   printf "%-20s %s\n" "NAME" "IPV4"
   while read -r name ipv4; do
@@ -188,26 +204,26 @@ list_droplets() {
 delete_droplet_by_name() {
   local droplet_name="$1"
   local droplet_id
-  droplet_id="$(doctl --context gui compute droplet list --format ID,Name --no-header \
+  droplet_id="$(doctl ${DOCTL_CTX} compute droplet list --format ID,Name --no-header \
     | awk -v target="${droplet_name}" '$2==target{print $1; exit}')"
   if [[ -z "${droplet_id}" ]]; then
     echo "ERROR: Could not find droplet named '${droplet_name}'." >&2
     exit 1
   fi
   log "Deleting droplet ${droplet_name} (ID: ${droplet_id})"
-  doctl --context gui compute droplet delete "${droplet_id}" --force >/dev/null
+  doctl ${DOCTL_CTX} compute droplet delete "${droplet_id}" --force >/dev/null
   log "Deleted ${droplet_name}"
 }
 
 reset_droplets() {
   local rows
-  rows="$(doctl --context gui compute droplet list --format ID,Name --no-header 2>/dev/null || true)"
+  rows="$(doctl ${DOCTL_CTX} compute droplet list --format ID,Name --no-header 2>/dev/null || true)"
   local deleted=0
   while read -r droplet_id droplet_name; do
     [[ -z "${droplet_id}" ]] && continue
     if [[ "${droplet_name}" == ${DO_DROPLET_PREFIX}-* ]]; then
       log "Deleting droplet ${droplet_name} (ID: ${droplet_id})"
-      doctl --context gui compute droplet delete "${droplet_id}" --force >/dev/null
+      doctl ${DOCTL_CTX} compute droplet delete "${droplet_id}" --force >/dev/null
       ((deleted++))
     fi
   done <<< "${rows}"
