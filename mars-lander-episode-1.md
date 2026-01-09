@@ -3,10 +3,9 @@
 ## Történet
 
 Hajnali 2 óra. Hangos kiabálás visszhangzik az Űrközpont elhagyatott folyosóin.
-
-„Az isten szerelmére, Mike! Kevesebb mint egy hónap múlva az indulás, és még mindig nincs megbízható megoldás!”
-
-Szögletes állkapocs, katonás hajviselet — Jeff a Mars küldetés vezetője, és éppen alapos fejmosást tart a vezető mérnökének.
+„Az isten szerelmére, Mike! Kevesebb mint egy hónap múlva az indulás, és még mindig nincs megbízható megoldás!”  
+  
+Szögletes állkapocs, katonás hajviselet — Jeff a Mars küldetés vezetője, és éppen alapos fejmosást tart a vezető mérnökének.  
 
 „De a szimulációk 99%-os sikerarányt mutatnak.”  
 „Na és? Az az 1% óriási! Rátennéd a küldetés sikerét erre? Ne feledd, ha lezuhan, nekünk is végünk.”  
