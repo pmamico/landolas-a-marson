@@ -89,7 +89,7 @@ while True:
     # Stabilizalas kezdeti mozgassal szemben
     if kezdo_mozgas_ellent is True:
         toloero = 4  # Fix toloero a gyors fekezeshez
-        irany = irany_sebesseg(kezdo_h_seb)  # Ellensulyozzuk az indulasi iranyt
+        irany = -irany_sebesseg(kezdo_h_seb)  # Ellensulyozzuk az indulasi iranyt
         forgatas = irany * (int(math.asin(cel_gyors_h / toloero) * 180 / pi) + 2)
         if v_seb > 0:
             toloero = 2
@@ -120,9 +120,9 @@ while True:
     # Leszallasi eljaras
     if leszallas is True:
         if abs(v_seb) < 36:
-            toloero = 2
+            toloero = 1
         else:
-            toloero = 4
+            toloero = 3
 
     # Diagnosztikai uzenetek a hibakereseshez
     print('Aktualis cel: {}'.format(cel), file=sys.stderr)
