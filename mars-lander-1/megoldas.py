@@ -38,9 +38,9 @@ while True:
 
     # 3/c — Közeledve a talajhoz óvatosabb üzemmód
     # Minél alacsonyabban vagyunk, annál nagyobb minimum teljesítményt kérünk.
-    if y < 300:
+    if y < 500:
         szukseges_gaz = max(szukseges_gaz, 4)
-    elif y < 800:
+    elif y < 1000:
         szukseges_gaz = max(szukseges_gaz, 3)
     elif y < 1500:
         szukseges_gaz = max(szukseges_gaz, 2)

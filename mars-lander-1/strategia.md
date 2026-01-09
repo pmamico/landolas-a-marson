@@ -22,13 +22,6 @@ Stratégiai pontok:
 - Gondolkodj „magassági kapukban”: 1500 m felett stabilizálás, 800 m alatt lassítás, 300 m alatt végfék.
 - Ha a becsapódás előtt ~−20 m/s körül jársz, nem kell feltétlen a maximum.
 
-Hasznos gyakorlati megjegyzések:
-- Az inicializáláskor beolvasott felszínt itt nem kell felhasználni, de a formátum miatt kötelező beolvasni.
-- A naplózást írd a hiba kimenetre, hogy ne zavarja a kimeneti parancsokat (CodinGame sajátosság).
-
-Kapcsolódó kód:
-- [mars-lander-episode-1.py](mars-lander-1/mars-lander-episode-1.py)
-- [mars-lander-episode-1_just_in_time.py](mars-lander-1/mars-lander-episode-1_just_in_time.py)
 
 ## Just‑in‑time fékezés (üzemanyagkímélő)
 
@@ -67,6 +60,3 @@ Peremhelyzetek:
 - Ha nem található sík szakasz, landing_y = 0 (alapérték).
 - Ha elfogy az üzemanyag, a továbbiakban 0 teljesítmény – ez már a pályától függően lehet kockázatos.
 - Vízszintes sebesség ezen a szinten nem releváns; a dőlésszög végig 0.
-
-Kapcsolódó kód:
-- [mars-lander-episode-1_just_in_time.py](mars-lander-1/mars-lander-episode-1_just_in_time.py)

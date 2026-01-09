@@ -7,12 +7,12 @@ surface = []
 for i in range(surface_n):
     land_x, land_y = [int(j) for j in input().split()]
     surface.append((land_x, land_y))
-
+count=0
 while True:
     x, y, vizszintes_sebesseg, fuggoleges_sebesseg, benzin, forgatas, gaz = [int(i) for i in input().split()]
 
     # Mindig függőlegesen tartjuk a hajót ezen a szinten
-    cel_forgatas = 0
+    cel_forgatas = count
 
     szukseges_gaz = 0
     # Ez nem lesz jó, mert ha nincs gáz, gyorsan lezuhanunk
@@ -23,3 +23,4 @@ while True:
 
 
     print(f"{cel_forgatas} {szukseges_gaz}")
+    count=count+1
