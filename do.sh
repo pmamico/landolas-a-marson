@@ -26,6 +26,7 @@ Usage:
   ./do.sh list        # list droplets with IPv4
   ./do.sh reset       # delete all droplets with the configured prefix
   ./do.sh rm N        # delete droplet <prefix>-N
+  ./do.sh command "CMD" # run CMD on every droplet with the prefix
 EOF
   exit 1
 }
@@ -238,6 +239,33 @@ reset_droplets() {
   fi
 }
 
+run_command_on_droplets() {
+  local remote_cmd="$1"
+  local rows
+  rows="$(doctl ${DOCTL_CTX} compute droplet list --format ID,Name,PublicIPv4 --no-header 2>/dev/null || true)"
+  local matched=0
+  local overall_status=0
+  local quoted_cmd
+  quoted_cmd="$(printf '%q' "${remote_cmd}")"
+  while read -r droplet_id droplet_name ipv4; do
+    [[ -z "${droplet_id}" ]] && continue
+    if [[ "${droplet_name}" == ${DO_DROPLET_PREFIX}-* ]]; then
+      matched=1
+      [[ -z "${ipv4}" || "${ipv4}" == "<nil>" ]] && ipv4="-"
+      log "Running command on ${droplet_name} (${ipv4})"
+      if ! doctl ${DOCTL_CTX} compute ssh "${droplet_id}" --ssh-user "${DO_SSH_USER}" --ssh-command "bash -lc ${quoted_cmd}"; then
+        log "Command failed on ${droplet_name}"
+        overall_status=1
+      fi
+    fi
+  done <<< "${rows}"
+  if (( matched == 0 )); then
+    log "No droplets found with prefix '${DO_DROPLET_PREFIX}-'."
+    return 1
+  fi
+  return ${overall_status}
+}
+
 normalize_suffix() {
   local raw="$1"
   if [[ "${raw}" =~ ^[0-9]+$ ]]; then
@@ -260,6 +288,7 @@ main() {
   local action="create"
   local count=1
   local rm_arg=""
+  local command_arg=""
 
   if [[ $# -eq 0 ]]; then
     action="create"
@@ -277,6 +306,11 @@ main() {
         action="rm"
         rm_arg="${2:-}"
         [[ $# -eq 2 && -n "${rm_arg}" ]] || usage
+        ;;
+      command)
+        action="command"
+        command_arg="${2:-}"
+        [[ $# -eq 2 && -n "${command_arg}" ]] || usage
         ;;
       create)
         action="create"
@@ -311,6 +345,9 @@ main() {
       ;;
     rm)
       handle_delete "${rm_arg}"
+      ;;
+    command)
+      run_command_on_droplets "${command_arg}"
       ;;
     *)
       usage
