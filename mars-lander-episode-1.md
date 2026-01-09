@@ -80,9 +80,7 @@ A program először a bemenetet olvassa be a szabványos bemenetről. Ezután eg
 - 0 ≤ power ≤ 4
 - Válaszidő körönként ≤ 100 ms
 
-## Példa
-
-Inicializálás bemenet:
+## Példa bemenet
 
 ```text
 6                          # surfaceN — 6 pontból áll a felszín
