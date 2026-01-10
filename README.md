@@ -2,7 +2,7 @@
 
 ![Mars Lander](img/demo.gif)
 
-A ["Formáld a világod!"](https://verseny.c3.hu/) 2026 verseny kapcsán az egyik workshop interaktív anyagrésze.  
+A ["Formáld a világod!"](https://verseny.c3.hu/) 2025 verseny kapcsán az egyik workshop interaktív anyagrésze.  
 
 A CodinGame.com-on megtalálható Mars Lander 1 és Mars Lander 2 programozós fejtőrőket mutatja be ez a projekt.  
 - https://www.codingame.com/ide/puzzle/mars-lander-episode-1
